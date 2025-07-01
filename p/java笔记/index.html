@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="随手记一记">
+<title>Java笔记</title>
+
+<link rel='canonical' href='https://Pupil770.github.io/p/java%E7%AC%94%E8%AE%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.946cca6c6259ef94ac55abfae7c7bf3291ea3ed5eea17ef77500b257217c6710.css"><meta property='og:title' content="Java笔记">
+<meta property='og:description' content="随手记一记">
+<meta property='og:url' content='https://Pupil770.github.io/p/java%E7%AC%94%E8%AE%B0/'>
+<meta property='og:site_name' content='P'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2025-03-11T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-03-11T00:00:00&#43;00:00'/><meta property='og:image' content='https://Pupil770.github.io/p/java%E7%AC%94%E8%AE%B0/bg2.png' />
+<meta name="twitter:title" content="Java笔记">
+<meta name="twitter:description" content="随手记一记"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://Pupil770.github.io/p/java%E7%AC%94%E8%AE%B0/bg2.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_321bcca034d8ea60.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤡</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">P</a></h1>
+            <h2 class="site-description">🤡🤡🤡🤡🤡</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Pupil770'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#集合框架">集合框架</a>
+      <ol>
+        <li><a href="#collection集合体系特点">Collection集合体系特点</a></li>
+        <li><a href="#遍历集合">遍历集合</a></li>
+        <li><a href="#集合并发修改异常">集合并发修改异常</a></li>
+      </ol>
+    </li>
+    <li><a href="#map集合体系">Map集合体系</a>
+      <ol>
+        <li><a href="#遍历map集合">遍历Map集合</a></li>
+      </ol>
+    </li>
+    <li><a href="#stream流">Stream流</a></li>
+    <li><a href="#static静态修饰符">static静态修饰符</a></li>
+    <li><a href="#锁">锁</a></li>
+    <li><a href="#threadlocal">ThreadLocal</a></li>
+    <li><a href="#cas">CAS</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/java%E7%AC%94%E8%AE%B0/">
+                <img src="/p/java%E7%AC%94%E8%AE%B0/bg2_hu_7eedd9481dcafb3d.png"
+                        srcset="/p/java%E7%AC%94%E8%AE%B0/bg2_hu_7eedd9481dcafb3d.png 800w, /p/java%E7%AC%94%E8%AE%B0/bg2_hu_a08abd4feab01316.png 1600w"
+                        width="800" 
+                        height="332" 
+                        loading="lazy"
+                        alt="Featured image of post Java笔记" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/java%E7%AC%94%E8%AE%B0/">Java笔记</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            随手记一记
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Mar 11, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="java笔记">Java笔记
+</h1><h2 id="集合框架">集合框架
+</h2><h3 id="collection集合体系特点">Collection集合体系特点
+</h3><ul>
+<li>List(接口)：添加元素有序、可重复、有索引
+<ul>
+<li>ArrayList(实现类)：
+<ul>
+<li>基于数组实现</li>
+<li>查询快，删除/添加慢（需移动元素）</li>
+</ul>
+</li>
+<li>LinkedList(实现类)：
+<ul>
+<li>基于双链表实现</li>
+<li>查询慢，增删快，首尾操作极快</li>
+<li>新增了许多首尾操作方法</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Set(接口)：无序、不可重复、无索引
+<ul>
+<li>HashSet(实现类)：
+<ul>
+<li>无序、不可重复、无索引</li>
+<li>JDK8前：数组+链表，JDK8后：数组+链表+红黑树</li>
+<li>可重写hashCode和equals保证自定义对象去重</li>
+</ul>
+</li>
+<li>LinkedHashSet(实现类)：
+<ul>
+<li>有序、不可重复、无索引</li>
+<li>底层数组+链表+红黑树+双链表机制</li>
+<li>占用内存大，CRUD性能好</li>
+</ul>
+</li>
+<li>TreeSet(实现类)：
+<ul>
+<li>默认升序排序、不可重复、无索引</li>
+<li>底层红黑树</li>
+<li>自定义类型需实现Comparable或传Comparator</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="遍历集合">遍历集合
+</h3><ul>
+<li>迭代器
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">//1.从集合对象中获取迭代器对象</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Collection</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="n">C</span><span class="o">=</span><span class="n">newArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&#34;赵敏&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&#34;小昭&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&#34;素素&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&#34;灭绝&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">//手动遍历</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="na">iterator</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">next</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">next</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">next</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">next</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">//循环结合迭代器</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">while</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">hashNext</span><span class="p">()){</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">String</span><span class="w"> </span><span class="n">ele</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">next</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">ele</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>增强for循环</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">ele</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">c</span><span class="p">){</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">ele</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>Lambda表达式
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">//原始代码</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Consumer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">()){</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">accept</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">s</span><span class="p">){</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">//可简化为↓</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">forEach</span><span class="p">((</span><span class="n">String</span><span class="w"> </span><span class="n">s</span><span class="p">){</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">s</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">//只有一个参数小括号类型可省略且循环体只有一条语句大括号可省略↓</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">s</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">//最终可省略为↓</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">c</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">::</span><span class="n">println</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h3 id="集合并发修改异常">集合并发修改异常
+</h3><ul>
+<li>使用迭代器遍历集合同时删除元素会抛出异常</li>
+<li>解决方法：
+<ol>
+<li>用迭代器自己的remove方法删除</li>
+<li>for循环倒序遍历删除，或正序遍历时删除后i&ndash;</li>
+</ol>
+</li>
+</ul>
+<h2 id="map集合体系">Map集合体系
+</h2><ul>
+<li>Map(接口)
+<ul>
+<li>HashMap(实现类)：
+<ul>
+<li>无序、不重复、无索引</li>
+<li>JDK8前：数组+链表，JDK8后：数组+链表+红黑树</li>
+<li>可重写hashCode和equals保证自定义对象去重</li>
+</ul>
+</li>
+<li>LinkedHashMap(实现类)：
+<ul>
+<li>有序、不可重复、无索引</li>
+<li>底层数组+链表+红黑树+双链表机制</li>
+<li>占用内存大，CRUD性能好</li>
+</ul>
+</li>
+<li>TreeMap(实现类)：
+<ul>
+<li>默认升序排序、不可重复、无索引</li>
+<li>底层红黑树</li>
+<li>自定义类型需实现Comparable或传Comparator</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="遍历map集合">遍历Map集合
+</h3><ul>
+<li>键找值：
+<ul>
+<li>用keySet获取所有键，遍历Set用get方法取值</li>
+</ul>
+</li>
+<li>键值对：
+<ul>
+<li>用entrySet获取Set&lt;Map.Entry&lt;K,V&raquo;，遍历Entry用getKey/getValue</li>
+</ul>
+</li>
+<li>Lambda表达式：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">map</span><span class="p">.</span><span class="na">forEach</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&#34;:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">v</span><span class="p">));</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h2 id="stream流">Stream流
+</h2><ul>
+<li>JDK8新增API(java.util.stream.*)用于操作集合或数组</li>
+<li>优势：结合Lambda，代码简洁、可读性好</li>
+<li>常用操作
+<ul>
+<li>​中间操作​​：
+<ul>
+<li>filter(Predicate)：过滤</li>
+<li>map(Function)：映射转换</li>
+<li>distinct()：去重</li>
+<li>sorted()：排序</li>
+<li>limit(long)：限制数量</li>
+<li>skip(long)：跳过元素</li>
+</ul>
+</li>
+<li>终端操作​​：
+<ul>
+<li>forEach(Consumer)：遍历</li>
+<li>count()：计数</li>
+<li>collect(Collector)：收集</li>
+<li>reduce()：归约</li>
+<li>anyMatch()/allMatch()/noneMatch()：匹配检查</li>
+<li>findFirst()/findAny()：查找</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="static静态修饰符">static静态修饰符
+</h2><ul>
+<li>可修饰变量、方法、内部类</li>
+<li>静态变量/方法可通过类名访问，变量存储在静态区</li>
+<li>静态方法不能直接访问非静态变量</li>
+<li>静态内部类可直接实例化</li>
+</ul>
+<h2 id="锁">锁
+</h2><ul>
+<li>Java锁分为两类：
+<ul>
+<li>Synchronized同步锁</li>
+<li>​​锁升级过程​​：
+<ul>
+<li>无锁 -&gt; 偏向锁 -&gt; 轻量级锁 -&gt; 重量级锁</li>
+<li>JDK6后引入锁消除、锁粗化等优化</li>
+</ul>
+</li>
+<li>使用方式​​：
+<ul>
+<li>同步代码块：synchronized(obj) {&hellip;}</li>
+<li>同步方法：public synchronized void method() {&hellip;}</li>
+<li>静态同步方法：锁的是类对象</li>
+</ul>
+</li>
+<li>JUC包下各种锁（如ReentrantLock可重入锁）
+<ul>
+<li>ReentrantLock
+<ul>
+<li>特点：
+<ul>
+<li>可重入</li>
+<li>可中断</li>
+<li>公平/非公平可选</li>
+<li>可设置超时</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ReentrantLock基本用法</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="w">  </span><span class="n">Lock</span><span class="w"> </span><span class="n">lock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ReentrantLock</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">lock</span><span class="p">.</span><span class="na">lock</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="c1">// 临界区代码</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">lock</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>特性</th>
+          <th>Synchronized</th>
+          <th>ReentrantLock</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>实现方式</td>
+          <td>JVM层面</td>
+          <td>JDK层面</td>
+      </tr>
+      <tr>
+          <td>锁获取</td>
+          <td>自动</td>
+          <td>手动</td>
+      </tr>
+      <tr>
+          <td>可中断</td>
+          <td>不支持</td>
+          <td>支持</td>
+      </tr>
+      <tr>
+          <td>公平锁</td>
+          <td>非公平</td>
+          <td>可配置</td>
+      </tr>
+      <tr>
+          <td>条件队列</td>
+          <td>单一</td>
+          <td>多个Condition</td>
+      </tr>
+      <tr>
+          <td>性能</td>
+          <td>JDK6后优化良好</td>
+          <td>高竞争时更优</td>
+      </tr>
+  </tbody>
+</table></div>
+<h2 id="threadlocal">ThreadLocal
+</h2><ul>
+<li>线程局部变量，为每个线程提供独立副本</li>
+<li>解决多线程共享变量的数据竞争，无需加锁</li>
+<li>可用于方法调用链中传递上下文信息</li>
+<li>局部变量仅用于单方法，ThreadLocal可在单线程多方法间共享</li>
+<li>局部变量线程安全（栈帧独立），但引用共享对象时需注意</li>
+<li>内存泄漏问题：
+<ul>
+<li>ThreadLocal对象为弱引用，value为强引用，若Thread未终止，Entry会一直存在</li>
+<li>示例：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">ThreadLocal</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadLocal</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">tl</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="s">&#34;value&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">tl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"> </span><span class="c1">// ThreadLocal对象失去强引用，Entry.key=null但value还在</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h2 id="cas">CAS
+</h2><ul>
+<li>
+<p>什么是CAS？<br>
+CAS(Compare-And-Swap)是一种无锁的原子操作机制，它包含三个操作数：内存位置(V)、预期原值(A)和新值(B)。当且仅当V的值等于A时，CAS才会将V的值更新为B，否则不做任何操作。</p>
+</li>
+<li>
+<p>CAS原理<br>
+​​比较并交换​​：比较当前内存值与预期值，如果相同则更新为新值
+​​原子性​​：整个操作是一个不可分割的原子操作
+​​乐观锁​​：假设没有冲突，失败则重试</p>
+</li>
+<li>
+<p>常用原子类<br>
+AtomicInteger/AtomicLong：整型原子类
+AtomicBoolean：布尔型原子类
+AtomicReference：引用类型原子类
+AtomicIntegerArray/AtomicLongArray：数组原子类</p>
+</li>
+<li>
+<p>CAS优缺点</p>
+<ul>
+<li>优点:
+<ul>
+<li>非阻塞，线程无需挂起</li>
+<li>避免锁带来的上下文切换开销</li>
+<li>适合低竞争场景，性能高</li>
+</ul>
+</li>
+<li>缺点:
+<ul>
+<li>ABA问题​​：值从A变B又变回A，CAS会认为没变化</li>
+<li>解决方案：使用版本号（AtomicStampedReference）循环时间长开销大​​竞争激烈时可能长时间自旋</li>
+<li>只能保证一个变量的原子性，​​多个变量需额外处理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>CAS应用场景</p>
+<ul>
+<li>计数器（如AtomicInteger）</li>
+<li>乐观锁实现</li>
+<li>无锁数据结构（如ConcurrentHashMap的部分实现）</li>
+</ul>
+</li>
+</ul>
+<hr>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2025 P
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
