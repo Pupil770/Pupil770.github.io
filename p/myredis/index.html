@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Redis Redis持久化机制 redis提供了三种持久化方式：\nRDB： 原理：定期生成内存数据快照，保存为二进制文件。 Redis 提供了两个命令来生成RDB文件，分别是save和bgsave。 save ：在主线程生成RDB文件，如果写入文件时间过长，会阻塞主线程。 bgsave：会创建一个子进程来生成RDB文件，避免主进程阻塞。 AOF： 原理：记录所有写的操作命令（如：SET、DEL）以追加方式写入文件。（先执行操作，后追加写入；有丢失风险） Redis提供了3种写回硬盘的策略。在Redis.conf配置文件中的appendfsync配置项可以有以下3种参数可填： Always（总是）：每次写操作命令执行完后，同步将AOF日志数据写回硬盘； Everysec（每秒）：先将命令写入到AOF文件的内核缓冲区，然后每隔一秒将缓冲区里的内容写回到硬盘； No：不由Redis控制回写时机，先将命令写入到AOF文件的内核缓冲区，再由操作系统决定何时将缓冲区内容写回硬盘。 当AOF文件的大小超过所设定的阈值后，Redis就会启用AOF重写机制，来压缩AOF文件。 混合模式： RDB优点是数据恢复速度快，但是快照的频率不好把握。频率太低，丢失的数据就会比较多，频率太高，就会影响性能。 AOF优点是丢失数据少，但是数据恢复不快。 Redis 4.0 提出了混合使用AOF日志和内存快照； 混合持久化工作在AOF日志重写过程，当开启了混合持久化时，在AOF重写日志时，fork出来的重写子进程会先将与主线程共享的内存数据以RDB方式写入到AOF文件，然后主线程处理的操作命令会被记录在重写缓冲区里，重写缓冲区里的增量命令会以AOF方式写入到AOF文件，写入完成后通知主进程将新的含有RDB格式和AOF格式的AOF文件替换旧的AOF文件。也就是说，使用了混合持久化，AOF文件的前半部分是RDB格式的全量数据，后半部分是AOF格式的增量数据。 Redis线程模型 Redis是单线程吗？ Redis单线程指的是[接收请求&ndash;&gt;解析请求&ndash;&gt;进行数据读写操作&ndash;&gt;发送数据给客户端]这个过程是由一个主线程完成的。\n">
+<title>MyRedis</title>
+
+<link rel='canonical' href='http://localhost:1313/p/myredis/'>
+
+<link rel="stylesheet" href="/scss/style.min.946cca6c6259ef94ac55abfae7c7bf3291ea3ed5eea17ef77500b257217c6710.css"><meta property='og:title' content="MyRedis">
+<meta property='og:description' content="Redis Redis持久化机制 redis提供了三种持久化方式：\nRDB： 原理：定期生成内存数据快照，保存为二进制文件。 Redis 提供了两个命令来生成RDB文件，分别是save和bgsave。 save ：在主线程生成RDB文件，如果写入文件时间过长，会阻塞主线程。 bgsave：会创建一个子进程来生成RDB文件，避免主进程阻塞。 AOF： 原理：记录所有写的操作命令（如：SET、DEL）以追加方式写入文件。（先执行操作，后追加写入；有丢失风险） Redis提供了3种写回硬盘的策略。在Redis.conf配置文件中的appendfsync配置项可以有以下3种参数可填： Always（总是）：每次写操作命令执行完后，同步将AOF日志数据写回硬盘； Everysec（每秒）：先将命令写入到AOF文件的内核缓冲区，然后每隔一秒将缓冲区里的内容写回到硬盘； No：不由Redis控制回写时机，先将命令写入到AOF文件的内核缓冲区，再由操作系统决定何时将缓冲区内容写回硬盘。 当AOF文件的大小超过所设定的阈值后，Redis就会启用AOF重写机制，来压缩AOF文件。 混合模式： RDB优点是数据恢复速度快，但是快照的频率不好把握。频率太低，丢失的数据就会比较多，频率太高，就会影响性能。 AOF优点是丢失数据少，但是数据恢复不快。 Redis 4.0 提出了混合使用AOF日志和内存快照； 混合持久化工作在AOF日志重写过程，当开启了混合持久化时，在AOF重写日志时，fork出来的重写子进程会先将与主线程共享的内存数据以RDB方式写入到AOF文件，然后主线程处理的操作命令会被记录在重写缓冲区里，重写缓冲区里的增量命令会以AOF方式写入到AOF文件，写入完成后通知主进程将新的含有RDB格式和AOF格式的AOF文件替换旧的AOF文件。也就是说，使用了混合持久化，AOF文件的前半部分是RDB格式的全量数据，后半部分是AOF格式的增量数据。 Redis线程模型 Redis是单线程吗？ Redis单线程指的是[接收请求&ndash;&gt;解析请求&ndash;&gt;进行数据读写操作&ndash;&gt;发送数据给客户端]这个过程是由一个主线程完成的。\n">
+<meta property='og:url' content='http://localhost:1313/p/myredis/'>
+<meta property='og:site_name' content='P'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2025-07-04T17:19:54&#43;08:00'/><meta property='article:modified_time' content='2025-07-04T17:19:54&#43;08:00'/><meta property='og:image' content='http://localhost:1313/p/myredis/001.png' />
+<meta name="twitter:title" content="MyRedis">
+<meta name="twitter:description" content="Redis Redis持久化机制 redis提供了三种持久化方式：\nRDB： 原理：定期生成内存数据快照，保存为二进制文件。 Redis 提供了两个命令来生成RDB文件，分别是save和bgsave。 save ：在主线程生成RDB文件，如果写入文件时间过长，会阻塞主线程。 bgsave：会创建一个子进程来生成RDB文件，避免主进程阻塞。 AOF： 原理：记录所有写的操作命令（如：SET、DEL）以追加方式写入文件。（先执行操作，后追加写入；有丢失风险） Redis提供了3种写回硬盘的策略。在Redis.conf配置文件中的appendfsync配置项可以有以下3种参数可填： Always（总是）：每次写操作命令执行完后，同步将AOF日志数据写回硬盘； Everysec（每秒）：先将命令写入到AOF文件的内核缓冲区，然后每隔一秒将缓冲区里的内容写回到硬盘； No：不由Redis控制回写时机，先将命令写入到AOF文件的内核缓冲区，再由操作系统决定何时将缓冲区内容写回硬盘。 当AOF文件的大小超过所设定的阈值后，Redis就会启用AOF重写机制，来压缩AOF文件。 混合模式： RDB优点是数据恢复速度快，但是快照的频率不好把握。频率太低，丢失的数据就会比较多，频率太高，就会影响性能。 AOF优点是丢失数据少，但是数据恢复不快。 Redis 4.0 提出了混合使用AOF日志和内存快照； 混合持久化工作在AOF日志重写过程，当开启了混合持久化时，在AOF重写日志时，fork出来的重写子进程会先将与主线程共享的内存数据以RDB方式写入到AOF文件，然后主线程处理的操作命令会被记录在重写缓冲区里，重写缓冲区里的增量命令会以AOF方式写入到AOF文件，写入完成后通知主进程将新的含有RDB格式和AOF格式的AOF文件替换旧的AOF文件。也就是说，使用了混合持久化，AOF文件的前半部分是RDB格式的全量数据，后半部分是AOF格式的增量数据。 Redis线程模型 Redis是单线程吗？ Redis单线程指的是[接收请求&ndash;&gt;解析请求&ndash;&gt;进行数据读写操作&ndash;&gt;发送数据给客户端]这个过程是由一个主线程完成的。\n"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='http://localhost:1313/p/myredis/001.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_321bcca034d8ea60.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤡</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">P</a></h1>
+            <h2 class="site-description">🤡🤡🤡🤡🤡</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/Pupil770'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#redis持久化机制">Redis持久化机制</a>
+      <ol>
+        <li><a href="#rdb">RDB：</a></li>
+        <li><a href="#aof">AOF：</a></li>
+        <li><a href="#混合模式">混合模式：</a></li>
+      </ol>
+    </li>
+    <li><a href="#redis线程模型">Redis线程模型</a>
+      <ol>
+        <li><a href="#redis是单线程吗">Redis是单线程吗？</a></li>
+        <li><a href="#redis采用单线程网络io与执行命令为什么能这么快">Redis采用单线程(网络I/O与执行命令)为什么能这么快？</a></li>
+      </ol>
+    </li>
+    <li><a href="#redis集群">Redis集群</a>
+      <ol>
+        <li><a href="#主从复制">主从复制：</a></li>
+        <li><a href="#哨兵模式">哨兵模式：</a></li>
+        <li><a href="#切片集群模式">切片集群模式：</a>
+          <ol>
+            <li><a href="#集群脑裂导致数据丢失怎么办">集群脑裂导致数据丢失怎么办？</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#redis过期删除与内存淘汰">Redis过期删除与内存淘汰</a>
+      <ol>
+        <li><a href="#过期删除">过期删除</a>
+          <ol>
+            <li><a href="#惰性删除">惰性删除：</a></li>
+            <li><a href="#定期删除">定期删除：</a></li>
+          </ol>
+        </li>
+        <li><a href="#持久化时对过期键的处理">持久化时对过期键的处理</a>
+          <ol>
+            <li><a href="#rdb-1">RDB：</a></li>
+            <li><a href="#aof-1">AOF：</a></li>
+          </ol>
+        </li>
+        <li><a href="#redis内存淘汰策略">Redis内存淘汰策略：</a></li>
+      </ol>
+    </li>
+    <li><a href="#redis缓存设计">redis缓存设计</a>
+      <ol>
+        <li><a href="#如何避免缓存雪崩缓存击穿缓存穿透">如何避免缓存雪崩、缓存击穿、缓存穿透？</a>
+          <ol>
+            <li><a href="#缓存雪崩">缓存雪崩：</a></li>
+            <li><a href="#缓存击穿">缓存击穿：</a></li>
+            <li><a href="#缓存穿透">缓存穿透：</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#如何保证数据库一致性">如何保证数据库一致性</a>
+      <ol>
+        <li><a href="#旁路缓存策略cacheaside策略">旁路缓存策略（CacheAside策略）</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/myredis/">
+                <img src="/p/myredis/001_hu_faa7bf7cb574f8af.png"
+                        srcset="/p/myredis/001_hu_faa7bf7cb574f8af.png 800w, /p/myredis/001_hu_f99a84ebf4929296.png 1600w"
+                        width="800" 
+                        height="307" 
+                        loading="lazy"
+                        alt="Featured image of post MyRedis" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/myredis/">MyRedis</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jul 04, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 10 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="redis">Redis
+</h1><h2 id="redis持久化机制">Redis持久化机制
+</h2><p>redis提供了三种持久化方式：</p>
+<h3 id="rdb">RDB：
+</h3><ul>
+<li>原理：定期生成内存数据快照，保存为二进制文件。</li>
+<li>Redis 提供了两个命令来生成RDB文件，分别是<code>save</code>和<code>bgsave</code>。
+<ul>
+<li><code>save</code> ：在主线程生成RDB文件，如果写入文件时间过长，会阻塞主线程。</li>
+<li><code>bgsave</code>：会创建一个子进程来生成RDB文件，避免主进程阻塞。</li>
+</ul>
+</li>
+</ul>
+<h3 id="aof">AOF：
+</h3><ul>
+<li>原理：记录所有写的操作命令（如：SET、DEL）以追加方式写入文件。（先执行操作，后追加写入；有丢失风险）</li>
+<li>Redis提供了3种写回硬盘的策略。在Redis.conf配置文件中的appendfsync配置项可以有以下3种参数可填：
+<ul>
+<li>Always（总是）：每次写操作命令执行完后，同步将AOF日志数据写回硬盘；</li>
+<li>Everysec（每秒）：先将命令写入到AOF文件的内核缓冲区，然后每隔一秒将缓冲区里的内容写回到硬盘；</li>
+<li>No：不由Redis控制回写时机，先将命令写入到AOF文件的内核缓冲区，再由操作系统决定何时将缓冲区内容写回硬盘。</li>
+</ul>
+</li>
+<li>当AOF文件的大小超过所设定的阈值后，Redis就会启用AOF重写机制，来压缩AOF文件。</li>
+</ul>
+<h3 id="混合模式">混合模式：
+</h3><ul>
+<li>RDB优点是数据恢复速度快，但是快照的频率不好把握。频率太低，丢失的数据就会比较多，频率太高，就会影响性能。</li>
+<li>AOF优点是丢失数据少，但是数据恢复不快。</li>
+<li>Redis 4.0 提出了混合使用AOF日志和内存快照；</li>
+<li>混合持久化工作在AOF日志重写过程，当开启了混合持久化时，在AOF重写日志时，fork出来的重写子进程会先将与主线程共享的内存数据以RDB方式写入到AOF文件，然后主线程处理的操作命令会被记录在重写缓冲区里，重写缓冲区里的增量命令会以AOF方式写入到AOF文件，写入完成后通知主进程将新的含有RDB格式和AOF格式的AOF文件替换旧的AOF文件。也就是说，使用了混合持久化，AOF文件的前半部分是RDB格式的全量数据，后半部分是AOF格式的增量数据。</li>
+</ul>
+<h2 id="redis线程模型">Redis线程模型
+</h2><h3 id="redis是单线程吗">Redis是单线程吗？
+</h3><p>Redis单线程指的是[接收请求&ndash;&gt;解析请求&ndash;&gt;进行数据读写操作&ndash;&gt;发送数据给客户端]这个过程是由一个主线程完成的。</p>
+<p>但是，Redis程序并不是单线程的：</p>
+<ul>
+<li>2.6版本，会启动两个后台线程分别处理关闭文件、AOF刷盘；</li>
+<li>4.0版本后，新增了lazyfree线程，用来异步释放Redis内存；<code>unlinkkey</code>/<code>flushdbasync</code>/<code>flushallasync</code>等命令，会把这些删除操作交给后台线程来执行，不会导致主线程卡顿。</li>
+</ul>
+<p>因此，当我们要删除一个大key的时候，不要使用<code>del</code>命令删除，因为del是在主线程处理的，这样会导致Redis主线程卡顿，因此我们应该使用<code>unlink</code>命令来异步删除大key。</p>
+<p>后台线程相当于一个消费者，生产者把耗时任务丢到任务队列中，消费者（BIO）不停轮询这个队列，拿出任务就去执行对应的方法即可。</p>
+<p>Redis6.0之前的单线程模式(网络I/O与执行命令)如下图（没理解）：</p>
+<p>在Redis6.0版本之后，也采用了多个I/O线程来处理网络请求，这是因为随着网络硬件的性能提升，Redis的性能瓶颈有时会出现在网络I/O的处理上。</p>
+<h3 id="redis采用单线程网络io与执行命令为什么能这么快">Redis采用单线程(网络I/O与执行命令)为什么能这么快？
+</h3><p>Redis线程吞吐量能达到10w/每秒。</p>
+<p>之所以采用Redis单线程(网络I/O与执行命令)那么快有以下原因：</p>
+<ol>
+<li>大部分操作都在内存中完成。</li>
+<li>单线程模型可以避免多线程竞争。</li>
+<li>采用I/O多路复用机制，多路复用机制是指一个线程处理多个IO流，就是我们经常听到的select/epoll机制。简单来说，在Redis只运行单线程的情况下，该机制允许内核中，同时存在多个监听Socket和已连接Socket。内核会一直监听这些Socket上的连接请求或数据请求。一旦有请求到达，就会交给Redis线程处理，这就实现了一个Redis线程处理多个IO流的效果。</li>
+</ol>
+<h2 id="redis集群">Redis集群
+</h2><p>一个高可用的Redis服务，一定要从Redis的多服务节点来考虑，比如Redis的主从复制、哨兵模式、切片集群。</p>
+<h3 id="主从复制">主从复制：
+</h3><p>主从复制是Redis高可用的最基础保证。实现方案就是将一台Redis服务器，同步数据到多台从服务器上，且主从服务器采用读写分离的方式。</p>
+<p>主服务可以进行读写操作，从服务器一般为只读，并接收主服务器同步过来写操作命令，然后执行。所以，修改操作只在主服务器上进行，然后同步给从服务器，使得主从服务器数据一致。</p>
+<p>但是！主从服务器之间的命令复制操作是异步的。所以无法保证强一致性，数据不一致是难以避免的。</p>
+<h3 id="哨兵模式">哨兵模式：
+</h3><p>哨兵模式(RedisSentinel）监控主从服务器，当主从服务器出现宕机时，提供主从节点故障转移功能。</p>
+<p>哨兵以集群方式部署，最少部署三台，哨兵定时Ping服务器，若服务器未在规定时间内响应则判断为下线。</p>
+<p>详细看哨兵模式。</p>
+<h3 id="切片集群模式">切片集群模式：
+</h3><p>当Redis缓存数据量大到一台服务器无法缓存时，就需要使用Redis切片集群(RedisCluster)方案。将数据分布在不同服务器上，降低系统对单主节点的依赖。</p>
+<p>Redis Cluster方案采用哈希槽(HashSlot)来处理数据和节点之间的映射关系。在RedisCluster方案中，一个切片共有16384个哈希槽，哈希槽类似于数据分区，每个键值对都会根据他的key被映射到一个哈希槽中，分为两步：</p>
+<ol>
+<li>根据Key按照CRC16算法计算一个16bit的值，在对16384取模，得到一个0~16384范围内的模数，每个数代表一个相应的编号的哈希槽。</li>
+<li>将哈希槽按平均分配或者手动分配映射到具体Redis节点上。</li>
+</ol>
+<h4 id="集群脑裂导致数据丢失怎么办">集群脑裂导致数据丢失怎么办？
+</h4><h5 id="什么是脑裂">什么是脑裂？
+</h5><p>如果主节点网络出现问题，与所有从节点失联，但主节点与客户端连接是正常的，客户端依旧向主节点缓存数据。这时，哨兵也发现主节点挂了(实际没挂，只是网络出问题了)，于是在从节点中选出新的主节点，此时，集群就有两个主节点了。&mdash;&mdash;&ndash;脑裂出现</p>
+<p>然后，旧主节点A网络突然好了，哨兵会将旧主节点A点降级为从节点，节点A会向新主节点请求同步数据，因为第一次同步是全量同步，所以节点A会清空自己本地的所有数据，失联期间客户端缓存的数据将会丢失。也就是集群脑裂导致数据丢失问题。</p>
+<h5 id="解决方案">解决方案：
+</h5><ul>
+<li>当主节点发现从节点下线或者通信超时时那么禁止主节点写入数据。</li>
+<li>在Redis配置文件中有两个参数：
+<ul>
+<li>min-slavers-to-write x:主节点必须有x个从节点连接，小于x主节点禁止写入。</li>
+<li>min-slavers-max-lag-x:主从数据复制不能超过x秒，超过x秒主节点禁止写入。</li>
+</ul>
+</li>
+<li>将这两个配置组合使用可解决数据丢失。</li>
+</ul>
+<h2 id="redis过期删除与内存淘汰">Redis过期删除与内存淘汰
+</h2><h3 id="过期删除">过期删除
+</h3><p>当我们对一个Key设置过期时间，redis会将该Key带上过期时间存在过期字典中（expiresDict）。</p>
+<p>我们查询一个key时，会先查询过期字典中是否存在该key：</p>
+<ul>
+<li>不存在：读取该key；</li>
+<li>存在：检查该key过期时间与当前系统时间进行对比，若大于系统时间就没有过期，否则判定该key过期；</li>
+</ul>
+<p>redis过期删除策略为惰性删除+定期删除搭配使用；</p>
+<h4 id="惰性删除">惰性删除：
+</h4><ul>
+<li>不主动删除过期key，每次数据库访问key时，都检测key是否过期，过期则删除key。</li>
+<li>优点：只有每次访问时才检测是否有过期key，节省系统资源；</li>
+<li>缺点：若过期key一直不被访问，会一直占用内存空间；</li>
+</ul>
+<h4 id="定期删除">定期删除：
+</h4><ul>
+<li>每隔一段时间，随机从数据库中取出一定量的key检查，并删除其中过期key。</li>
+<li>流程：
+<ol>
+<li>从过期字典中随机取20个key；</li>
+<li>检查key是否过期，删除其中过期key；</li>
+<li>若过期key数量大于5个(25%)，则重复1步骤，若小于5个，则停止删除。</li>
+</ol>
+</li>
+<li>为了保证redis删除不会出现循环过度，导致线程卡死，为此增加了循环时间上线默认不会超过25ms；</li>
+<li>优点：限制删除执行时间与频率，减少删除操作对cpu的影响，同时也能删除一部分过期key，减少对空间的无效占用；</li>
+<li>缺点：若删除太频繁，对cpu不太友好，若频率太低，与惰性删除效果差不多；</li>
+<li>所以Redis采用惰性+定期在合理使用cpu与避免内存浪费中取得平衡。</li>
+</ul>
+<h3 id="持久化时对过期键的处理">持久化时对过期键的处理
+</h3><h4 id="rdb-1">RDB：
+</h4><ul>
+<li>快照文件生成阶段：会对key进行过期检查，过期key不会被保存到RDB文件中；</li>
+<li>快照文件写入阶段(会分为主服务器与从服务器两种情况):
+<ul>
+<li>主服务器：会对key进行检查，过期key不会被写入数据库中；</li>
+<li>从服务器：所有数据都加载(包括过期)，但主从服务器数据同步时会将数据清空，所以不会造成影响。</li>
+</ul>
+</li>
+</ul>
+<h4 id="aof-1">AOF：
+</h4><ul>
+<li>AOF写入阶段：若在持久化时该过期key没被删除，AOF会保存此key，当过期key被删除后，redis会向AOF显式的追加一条DEL删除该key；</li>
+<li>AOF重写阶段：会检查过期key，过期key不会被写入；</li>
+</ul>
+<h3 id="redis内存淘汰策略">Redis内存淘汰策略：
+</h3><p>当redis内存达到某个阈值，就会触发内存淘汰策略，这个阈值就是我们设置的最大运行内存，此值在redis配置文件中的配置项为maxmemory；</p>
+<p>内存淘汰策略为8种：</p>
+<ol>
+<li>不淘汰：
+<ul>
+<li>noeviction：不淘汰，返回错误；</li>
+</ul>
+</li>
+<li>进行数据淘汰策略：
+<ul>
+<li>设置了过期时间key范围内淘汰：
+<ul>
+<li>volatile-random：随机淘汰；</li>
+<li>volatile-ttl：优先淘汰过期时间更早的key；</li>
+<li>volatile-lru：（3.0默认淘汰策略）淘汰最久未使用的；</li>
+<li>volatile-lfu：（4.0新增）淘汰使用最少的；</li>
+</ul>
+</li>
+<li>所有数据中淘汰：
+<ul>
+<li>allkeys-random：随机淘汰;</li>
+<li>allkeys-lru:最久未使用；</li>
+<li>allkeys-lfu:（4.0新增）使用最少；</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="redis缓存设计">redis缓存设计
+</h2><p>为了保证redis数据与与数据种的数据一致性，会给redis里的数据设置过期时间，当缓存数据过期后，用户访问不到缓存中的数据就会直接访问数据库中的数据，并更新缓存中的数据。</p>
+<h3 id="如何避免缓存雪崩缓存击穿缓存穿透">如何避免缓存雪崩、缓存击穿、缓存穿透？
+</h3><h4 id="缓存雪崩">缓存雪崩：
+</h4><p>当大量的数据在同一时间过期，若此时有大量用户请求，请求直接全部访问到数据库导致服务器宕机，从而造成一系列连锁反应导致系统崩溃，这就是雪崩问题。</p>
+<p>解决方案：</p>
+<ol>
+<li>将缓存失效时间随机打散：在原有失效时间上增加一个随机值(如1~10分钟)，降低集体失效的概率；</li>
+<li>不设置过期时间：通过后台服务来更新数据，避免失效；</li>
+</ol>
+<h4 id="缓存击穿">缓存击穿：
+</h4><p>业务中通常有几个数据被频繁访问，比如秒杀活动。若某个热点数据过期了，此时大量请求直接访问数据库，数据库被高并发请求冲垮，这就缓存穿透问题。</p>
+<p>解决方案：</p>
+<ol>
+<li>互斥锁方案（redis中使用setNX方法设置一个状态位，表示锁定状态），保证同一时间只有一个业务线程请求;</li>
+<li>不设置过期时间，或是在key过期前提前通知后台更新缓存；</li>
+</ol>
+<h4 id="缓存穿透">缓存穿透：
+</h4><p>当访问数据即不在缓存中也不在数据库中，导致缓存无法命中，数据库也不存在。当有大量这样的请求来到数据库中，导致数据库压力剧增，这就是缓存穿透问题。</p>
+<p>解决方案：</p>
+<ol>
+<li>非法请求限制：在API接口处判断请求参数是否合理，是否包含非法值等；</li>
+<li>设置空值或默认值：后续请求就可以从缓存中读取到空值或者默认值；</li>
+<li>使用布隆过滤器：将数据写入缓存时，使用布隆过滤器做个标记，当请求来到时确认缓存失效后，通过布隆过滤器快速判断数据是否存在过，若不存在则不访问数据库；</li>
+</ol>
+<h2 id="如何保证数据库一致性">如何保证数据库一致性
+</h2><p>在更新数据库数据时，为保证数据一致性，需要将缓存中的数据更新，否则用户会一直访问缓存中的旧数据。在更新数据库数据与缓存数据时，无论先更新数据库，后更新缓存；还是先更新缓存，后更新数据库；在并发下都会造成数据不一致。所以redis常用缓存更新策略为旁路缓存策略，即先更新数据库操作，后删除缓存，等到用户读取数据时再写入缓存。</p>
+<h3 id="旁路缓存策略cacheaside策略">旁路缓存策略（CacheAside策略）
+</h3><p>该策略可细分为读策略与写策略。</p>
+<ul>
+<li>写策略步骤：先更新数据库，再删除缓存；</li>
+<li>读策略步骤：读取数据若命中缓存则直接返回，未命中缓存则更新缓存数据并返回数据；</li>
+</ul>
+<p>注意：写策略顺序不能变(会有并发安全)，且先更新数据库，再删除缓存一样有并发安全;但概率并不高，因为缓存删除速度远快于数据库写入速度。</p>
+<p>适合场景：旁路缓存适合读多写少的场景，因为如果频繁写入，缓存中的数据会被频繁的清理，对缓存命中率有一些影响。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2025 P
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1ad0100d5d3b17f1840a489e493b72e1cbd903545e8f7eee7baa7ba311518c49.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
